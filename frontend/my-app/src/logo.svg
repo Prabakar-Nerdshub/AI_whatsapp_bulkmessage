@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" width="150" height="150">
+  <!-- Outer Black Layer (Outline) for Chatbot Face -->
+  <circle cx="75" cy="60" r="55" fill="transparent" stroke="black" stroke-width="5"/>
+
+  <!-- Chatbot Face -->
+  <circle cx="75" cy="60" r="50" fill="#4CAF50" stroke="#ffffff" stroke-width="5"/>
+
+  <!-- Eyes -->
+  <circle cx="60" cy="50" r="8" fill="#ffffff"/>
+  <circle cx="90" cy="50" r="8" fill="#ffffff"/>
+
+  <!-- Smile -->
+  <path d="M 60 75 Q 75 85, 90 75" stroke="#ffffff" stroke-width="4" fill="transparent"/>
+
+  <!-- Speech Bubble with Black Outline -->
+  <path d="M 30 30 Q 75 10, 120 30 Q 120 80, 75 100 Q 30 80, 30 30 Z" fill="#ccc" stroke="" stroke-width="3" opacity="0.8"/>
+
+  <!-- Text inside the Speech Bubble -->
+  <text x="75" y="55" font-family="Arial" font-size="16" fill="#4CAF50" text-anchor="middle" alignment-baseline="middle">
+    Hello!
+  </text>
+
+  <!-- Tail of the Speech Bubble -->
+  <polygon points="75,100 70,110 80,110" fill="#ffffff" opacity="0.8"/>
+</svg>
