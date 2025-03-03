@@ -45,7 +45,7 @@ def send_bulk_messages(request):
             data = json.loads(raw_data)
             message = data.get("message", "").strip()
             phone_numbers = data.get("phoneNumbers", [])
-            country_code = data.get("countryCode", "+91")
+            country_code = "91"  # Fixed country code without '+'
 
             if not message or not phone_numbers:
                 return JsonResponse({"error": "Message and phone numbers are required."}, status=400)
@@ -54,16 +54,17 @@ def send_bulk_messages(request):
             for num in phone_numbers:
                 num_str = str(num).strip()
 
-                # Remove any non-numeric characters except '+'
+                # Remove any non-numeric characters
                 num_str = re.sub(r"[^\d]", "", num_str)
 
-                # Ensure +91 prefix and strict format
-                num_str = f"{country_code}{num_str}"
+                # Ensure 91 prefix
+                if not num_str.startswith("91"):
+                    num_str = f"{country_code}{num_str}"
 
                 # Explicitly remove spaces
                 num_str = num_str.replace(" ", "")
 
-                if re.match(r"^\+91\d{10}$", num_str):  # Validate format
+                if re.match(r"^91\d{10}$", num_str):  # Validate format
                     formatted_phone_numbers.append(num_str)
                 else:
                     logger.warning(f"Invalid phone number format: {num_str}")
