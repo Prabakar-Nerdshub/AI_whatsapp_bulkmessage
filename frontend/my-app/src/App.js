@@ -22,8 +22,17 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Box sx={{ display: "flex", height: "100vh" }}>
+      <Box
+        sx={{
+          display: "flex",
+          height: "100vh",
+          backgroundImage: "url('/background.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <Router>
           <Sidebar />
           <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
             <Routes>
@@ -33,8 +42,8 @@ const App = () => {
               <Route path="/faq" element={<FAQ />} />
             </Routes>
           </Box>
-        </Box>
-      </Router>
+        </Router>
+      </Box>
     </ThemeProvider>
   );
 };
