@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Paper
-} from "@mui/material";
+import { Container, TextField, Button, Typography, Box, Paper } from "@mui/material";
 
-const Login = () => {
+const Login = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,6 +13,7 @@ const Login = () => {
 
     // Simple authentication check
     if (username === "admin" && password === "password") {
+      setIsAuthenticated(true); // Set authentication to true
       navigate("/chatbot"); // Redirect on successful login
     } else {
       setError("Invalid username or password");
@@ -29,13 +23,9 @@ const Login = () => {
   return (
     <Container component="main" maxWidth="xs">
       <Paper elevation={3} sx={{ padding: 4, marginTop: 8, textAlign: "left" }}>
-        <Typography variant="h4" gutterBottom>
-          Login
-        </Typography>
+        <Typography variant="h4" gutterBottom>Login</Typography>
         {error && (
-          <Typography variant="body1" color="error">
-            {error}
-          </Typography>
+          <Typography variant="body1" color="error">{error}</Typography>
         )}
         <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
           <TextField

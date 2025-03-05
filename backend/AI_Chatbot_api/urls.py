@@ -17,8 +17,15 @@ Including another URLconf
 # AI_Chatbot_api/urls.py
 
 from django.urls import path
-from .views import send_bulk_messages
+from .views import get_csrf_token, upload_file, get_phone_numbers
+from .views import send_whatsapp_message
+
 
 urlpatterns = [
-    path('send-bulk-messages/', send_bulk_messages, name='send_bulk_messages'),
+    path("csrf/", get_csrf_token, name="csrf_token"),
+    path('upload', upload_file, name='upload_file'),
+    path("get_phone_numbers/<str:file_id>/", get_phone_numbers, name='get_phone_numbers'),
+    path("send_whatsapp_message", send_whatsapp_message, name="send_whatsapp_message"),
 ]
+
+

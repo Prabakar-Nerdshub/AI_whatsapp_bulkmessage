@@ -18,7 +18,7 @@ const Sidebar = () => {
           <ListItemText primary="Chat Page" />
         </ListItem>
 
-        {/* Model Selection Dropdown with Reduced Size */}
+        {/* Model Selection Dropdown with Reduced Size
         <FormControl sx={{ width: "80%", marginBottom: 1 }}>
           <InputLabel>Select Model</InputLabel>
           <Select
@@ -29,7 +29,7 @@ const Sidebar = () => {
             <MenuItem value="Ollama">Ollama</MenuItem>
             <MenuItem value="GPT-4">GPT-4</MenuItem>
           </Select>
-        </FormControl>
+        </FormControl>*/}
 
         {/* Open Data Connector Popup */}
         <ListItem button onClick={() => setOpenDataConnector(true)}>

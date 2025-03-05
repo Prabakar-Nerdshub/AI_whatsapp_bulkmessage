@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route,} from "react-router-dom";
 import { CssBaseline, Box } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
@@ -17,20 +17,20 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Box sx={{ display: "flex", height: "100vh" }}>
-          <Sidebar />
+          {isAuthenticated && <Sidebar />} {/* Show Sidebar only if authenticated */}
           <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
             <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/chatbot" element={<Chatbot phoneNumbers={phoneNumbers} />} />
-              <Route path="/data-connector" element={<DataConnectorPopup setPhoneNumbers={setPhoneNumbers} />} />
-              <Route path="/faq" element={<FAQ />} />
+              <Route path="/" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+              <Route path="/chatbot" element={isAuthenticated ? <Chatbot /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
+              <Route path="/data-connector" element={isAuthenticated ? <DataConnectorPopup /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
+              <Route path="/faq" element={isAuthenticated ? <FAQ /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
             </Routes>
           </Box>
         </Box>
