@@ -1,23 +1,30 @@
-import React, { useState } from "react";
-import {
-    Card, CardContent, Typography, Button, Input, Box,
-    Snackbar, Alert, Dialog, LinearProgress
-} from "@mui/material";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+    Card, CardContent, Typography, Button, Input, Box, TextField,
+    Snackbar, Alert, Dialog, LinearProgress, MenuItem, Select, FormControl, InputLabel
+} from "@mui/material";
 
 const DataConnectorPopup = ({ open, handleClose }) => {
     const [file, setFile] = useState(null);
+    const [fileName, setFileName] = useState(""); // New state for file name
     const [uploadProgress, setUploadProgress] = useState(0);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [severity, setSeverity] = useState("success");
+    const [fileGroups, setFileGroups] = useState([]);
+    const [selectedFileGroup, setSelectedFileGroup] = useState("");
 
-    // Handle file selection with validation
+    useEffect(() => {
+        axios.get("http://127.0.0.1:8000/api/file_groups/")
+            .then((response) => setFileGroups(response.data))
+            .catch((error) => console.error("Error fetching file groups:", error));
+    }, []);
+
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
-            // Check if file is CSV or Excel
             const fileType = selectedFile.name.split('.').pop().toLowerCase();
             if (!['csv', 'xls', 'xlsx'].includes(fileType)) {
                 setErrorMessage("Please select a CSV or Excel file.");
@@ -25,14 +32,13 @@ const DataConnectorPopup = ({ open, handleClose }) => {
                 return;
             }
             setFile(selectedFile);
-            setUploadProgress(0); // Reset progress bar
+            setUploadProgress(0);
         }
     };
 
-    // Upload file to MongoDB (GridFS)
     const handleUpload = async () => {
-        if (!file) {
-            setErrorMessage("Please select a file first.");
+        if (!file || !fileName.trim()) {
+            setErrorMessage("Please select a file and enter a name.");
             setSeverity("error");
             setOpenSnackbar(true);
             return;
@@ -40,10 +46,10 @@ const DataConnectorPopup = ({ open, handleClose }) => {
 
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("file_name", fileName);
 
         try {
-            setUploadProgress(10); // Start progress indication
-
+            setUploadProgress(10);
             const response = await axios.post("http://127.0.0.1:8000/api/upload", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 onUploadProgress: (progressEvent) => {
@@ -53,15 +59,11 @@ const DataConnectorPopup = ({ open, handleClose }) => {
             });
 
             if (response.data && response.data.file_id) {
-                // Store the file ID for use in the Chatbot component
                 localStorage.setItem("uploadedFileId", response.data.file_id);
-
                 setSnackbarMessage("File uploaded successfully!");
                 setSeverity("success");
                 setOpenSnackbar(true);
-
-                // Test that we can retrieve phone numbers
-                testPhoneNumberRetrieval(response.data.file_id);
+                setTimeout(() => handleClose(), 1500);
             } else {
                 setSnackbarMessage("Upload succeeded but no file ID returned.");
                 setSeverity("warning");
@@ -76,32 +78,6 @@ const DataConnectorPopup = ({ open, handleClose }) => {
         }
     };
 
-    // Test that we can retrieve phone numbers from the uploaded file
-    const testPhoneNumberRetrieval = async (fileId) => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/get_phone_numbers/${fileId}/`);
-            if (response.data && response.data.phone_numbers) {
-                const count = response.data.phone_numbers.length;
-                setSnackbarMessage(`File uploaded successfully! Found ${count} phone numbers.`);
-                setSeverity("success");
-                setOpenSnackbar(true);
-
-                // Close dialog after successful verification
-                setTimeout(() => handleClose(), 1500);
-            }
-        } catch (error) {
-            console.error("Error retrieving phone numbers:", error);
-            setSnackbarMessage("File uploaded but couldn't retrieve phone numbers.");
-            setSeverity("warning");
-            setOpenSnackbar(true);
-        }
-    };
-
-    // Close snackbar
-    const handleSnackbarClose = () => {
-        setOpenSnackbar(false);
-    };
-
     return (
         <Dialog open={open} onClose={handleClose}>
             <Card sx={{ maxWidth: 400, mx: "auto", mt: 4, p: 2, boxShadow: 3 }}>
@@ -110,6 +86,13 @@ const DataConnectorPopup = ({ open, handleClose }) => {
                         Upload Contact List
                     </Typography>
                     <Box display="flex" flexDirection="column" gap={2}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            label="File Name"
+                            value={fileName}
+                            onChange={(e) => setFileName(e.target.value)}
+                        />
                         <Input
                             type="file"
                             onChange={handleFileChange}
@@ -124,7 +107,7 @@ const DataConnectorPopup = ({ open, handleClose }) => {
                             variant="contained"
                             color="primary"
                             onClick={handleUpload}
-                            disabled={!file || uploadProgress > 0 && uploadProgress < 100}
+                            disabled={!file || !fileName.trim() || (uploadProgress > 0 && uploadProgress < 100)}
                         >
                             Upload
                         </Button>
@@ -138,19 +121,6 @@ const DataConnectorPopup = ({ open, handleClose }) => {
                         )}
                     </Box>
                 </CardContent>
-                <Snackbar
-                    open={openSnackbar}
-                    autoHideDuration={5000}
-                    onClose={handleSnackbarClose}
-                >
-                    <Alert
-                        onClose={handleSnackbarClose}
-                        severity={severity}
-                        sx={{ width: '100%' }}
-                    >
-                        {snackbarMessage}
-                    </Alert>
-                </Snackbar>
             </Card>
         </Dialog>
     );

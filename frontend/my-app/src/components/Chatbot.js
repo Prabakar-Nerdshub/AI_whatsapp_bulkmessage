@@ -1,44 +1,40 @@
 import React, { useState } from "react";
 import axios from "axios";
 import {
-  Card,
-  CardContent,
-  CardActions,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
-  Snackbar,
-  Alert,
+  Card, CardContent, CardActions, Button,
+  Typography, CircularProgress, Snackbar, Alert
 } from "@mui/material";
 
-const Chatbot = ({ fileId }) => {
-  const [message, setMessage] = useState("");
+const Chatbot = ({ confirmedContacts, selectedGroup }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSendMessage = async () => {
-  const fileId = localStorage.getItem("uploadedFileId");
-    if (!message.trim()) {
-      setError("Please enter a message.");
+    if (!selectedGroup) {
+      setError("Please select a file group.");
+      return;
+    }
+
+    if (confirmedContacts.length === 0) {
+      setError("No contacts selected.");
       return;
     }
 
     setLoading(true);
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/send_whatsapp_message", {
-        file_id: fileId,
-        message,
+        group_name: selectedGroup,
+        contacts: confirmedContacts,
       });
 
       if (response.status === 200) {
-        setSuccess("Messages sent successfully.");
-        setMessage("");
+        setSuccess(true);
       } else {
         setError("Failed to send messages.");
       }
     } catch (error) {
+      console.error("Error sending messages:", error);
       setError("Error sending messages.");
     } finally {
       setLoading(false);
@@ -52,38 +48,40 @@ const Chatbot = ({ fileId }) => {
           <Typography variant="h5" gutterBottom>
             Send WhatsApp Message
           </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            label="Enter your message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            disabled={loading}
-          />
+
+          <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+            Selected Group: {selectedGroup || "None"}
+          </Typography>
+
+          {confirmedContacts.length > 0 && (
+            <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
+              Selected Contacts: {confirmedContacts.length}
+            </Typography>
+          )}
         </CardContent>
+
         <CardActions>
           <Button
             onClick={handleSendMessage}
             variant="contained"
             color="primary"
+            size="small"
             fullWidth
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Send"}
+            {loading ? <CircularProgress size={20} /> : "Send"}
           </Button>
         </CardActions>
       </Card>
 
-      {/* Error Snackbar */}
-      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError("")}>
-        <Alert severity="error">{error}</Alert>
-      </Snackbar>
-
-      {/* Success Snackbar */}
-      <Snackbar open={!!success} autoHideDuration={4000} onClose={() => setSuccess("")}>
-        <Alert severity="success">{success}</Alert>
+      <Snackbar
+        open={success}
+        autoHideDuration={3000}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert onClose={() => setSuccess(false)} severity="success">
+          Message sent successfully!
+        </Alert>
       </Snackbar>
     </div>
   );

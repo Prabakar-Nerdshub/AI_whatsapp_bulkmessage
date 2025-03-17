@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Dialog,} from "@mui/material";
+import { Drawer, List, ListItem, ListItemText, Dialog,} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DataConnectorPopup from "./DataConnectorPopup";
 import FAQPopup from "./FAQPopup";
 
+
+
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [selectedModel, setSelectedModel] = useState("Ollama");
   const [openDataConnector, setOpenDataConnector] = useState(false);
   const [openFAQ, setOpenFAQ] = useState(false);
 
@@ -34,6 +35,10 @@ const Sidebar = () => {
         {/* Open Data Connector Popup */}
         <ListItem button onClick={() => setOpenDataConnector(true)}>
           <ListItemText primary="Upload Contact List" />
+        </ListItem>
+
+        <ListItem button onClick={() => navigate("/contact-list")}>
+          <ListItemText primary="Contact List" />
         </ListItem>
 
         {/* Open FAQ Popup */}
