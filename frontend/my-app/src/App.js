@@ -10,6 +10,8 @@ import Chatbot from "./components/Chatbot";
 import DataConnectorPopup from "./components/DataConnectorPopup";
 import FAQ from "./components/FAQPopup";
 import ContactList from "./components/ContactList";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsandConditions from "./components/TermsandConditions";
 
 const theme = createTheme({
   palette: {
@@ -45,10 +47,10 @@ const App = () => {
           sx={{
             display: "flex",
             height: "100vh",
-            backgroundImage: "url('/background2.png')", // Add your image path here
-            backgroundSize: "100%", // Ensures the image covers the entire background
-            backgroundPosition: "bottom", // Centers the image
-            backgroundRepeat: "no-repeat", // Prevents image tiling
+            backgroundImage: "url('/background2.png')",
+            backgroundSize: "100%",
+            backgroundPosition: "bottom",
+            backgroundRepeat: "no-repeat",
           }}
         >
           {isAuthenticated && <Sidebar />}
@@ -59,10 +61,7 @@ const App = () => {
                 path="/chatbot"
                 element={
                   isAuthenticated ? (
-                    <Chatbot
-                      confirmedContacts={confirmedContacts}
-                      selectedGroup={selectedGroup}
-                    />
+                    <Chatbot confirmedContacts={confirmedContacts} selectedGroup={selectedGroup} />
                   ) : (
                     <Login setIsAuthenticated={setIsAuthenticated} />
                   )
@@ -94,6 +93,11 @@ const App = () => {
                   )
                 }
               />
+              {/* Privacy Policy Route */}
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+              {/* Terms and Conditions Route */}
+              <Route path="/terms-and-conditions" element={<TermsandConditions />} />
             </Routes>
           </Box>
         </Box>

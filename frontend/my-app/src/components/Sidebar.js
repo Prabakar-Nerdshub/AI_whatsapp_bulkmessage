@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemText, Dialog,} from "@mui/material";
+import { Drawer, List, ListItem, ListItemText, Dialog } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DataConnectorPopup from "./DataConnectorPopup";
 import FAQPopup from "./FAQPopup";
-
-
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -19,19 +17,6 @@ const Sidebar = () => {
           <ListItemText primary="Chat Page" />
         </ListItem>
 
-        {/* Model Selection Dropdown with Reduced Size
-        <FormControl sx={{ width: "80%", marginBottom: 1 }}>
-          <InputLabel>Select Model</InputLabel>
-          <Select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            sx={{ fontSize: 14, height: 36 }}
-          >
-            <MenuItem value="Ollama">Ollama</MenuItem>
-            <MenuItem value="GPT-4">GPT-4</MenuItem>
-          </Select>
-        </FormControl>*/}
-
         {/* Open Data Connector Popup */}
         <ListItem button onClick={() => setOpenDataConnector(true)}>
           <ListItemText primary="Upload Contact List" />
@@ -45,6 +30,17 @@ const Sidebar = () => {
         <ListItem button onClick={() => setOpenFAQ(true)}>
           <ListItemText primary="FAQ" />
         </ListItem>
+
+        {/* Navigate to Privacy Policy Page */}
+        <ListItem button onClick={() => navigate("/privacy-policy")}>
+          <ListItemText primary="Privacy Policy" />
+        </ListItem>
+
+        {/* Navigate to Privacy Policy Page */}
+        <ListItem button onClick={() => navigate("/Terms-and-Conditions")}>
+          <ListItemText primary="Terms and Conditions" />
+        </ListItem>
+
       </List>
 
       {/* Data Connector Popup */}

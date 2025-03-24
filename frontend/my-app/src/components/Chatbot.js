@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import {
   Card, CardContent, CardActions, Button,
-  Typography, CircularProgress, Snackbar, Alert
+  Typography, CircularProgress, Snackbar, Alert, Grid
 } from "@mui/material";
 
 const Chatbot = ({ confirmedContacts, selectedGroup }) => {
@@ -43,36 +43,70 @@ const Chatbot = ({ confirmedContacts, selectedGroup }) => {
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <Card className="shadow-lg rounded-lg w-96 p-4">
-        <CardContent>
-          <Typography variant="h5" gutterBottom>
-            Send WhatsApp Message
-          </Typography>
-
-          <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-            Selected Group: {selectedGroup || "None"}
-          </Typography>
-
-          {confirmedContacts.length > 0 && (
-            <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
-              Selected Contacts: {confirmedContacts.length}
-            </Typography>
-          )}
-        </CardContent>
-
-        <CardActions>
-          <Button
-            onClick={handleSendMessage}
-            variant="contained"
-            color="primary"
-            size="small"
-            fullWidth
-            disabled={loading}
+      <Grid container spacing={2} sx={{ width: "100%" }}>
+        {/* Main Card */}
+        <Grid item xs={6}>
+          <Card
+            className="shadow-lg rounded-lg"
+            sx={{
+              width: "45%",  // Adjusted width to fit grid layout
+              padding: "16px",
+              boxShadow: 3,
+            }}
           >
-            {loading ? <CircularProgress size={20} /> : "Send"}
-          </Button>
-        </CardActions>
-      </Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Send WhatsApp Message
+              </Typography>
+
+              <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+                Selected Group: {selectedGroup || "None"}
+              </Typography>
+
+              {confirmedContacts.length > 0 && (
+                <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
+                  Selected Contacts: {confirmedContacts.length}
+                </Typography>
+              )}
+            </CardContent>
+
+            <CardActions>
+              <Button
+                onClick={handleSendMessage}
+                variant="contained"
+                color="primary"
+                size="small"
+                sx={{ width: "50%" }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : "Send"}
+              </Button>
+            </CardActions>
+          </Card>
+        </Grid>
+
+        {/* Empty Card for Future Use */}
+        <Grid item xs={6}>
+          <Card
+            className="shadow-lg rounded-lg"
+            sx={{
+              width: "60%",
+              height: "100%",
+              padding: "16px",
+              boxShadow: 3,
+            }}
+          >
+            <CardContent>
+              <Typography variant="h5" color="textSecondary">
+                Future Content Area
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                This space is reserved for future content or functionality.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Snackbar
         open={success}

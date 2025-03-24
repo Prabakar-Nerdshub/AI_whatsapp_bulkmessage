@@ -112,8 +112,8 @@ def send_whatsapp_message(request):
         try:
             data = json.loads(request.body)
             contacts = data.get("contacts", [])
-            template_name = data.get("template_name", "hello_world")
-            language_code = data.get("language_code", "en_US")
+            template_name = data.get("template_name", "sara2025message")
+            language_code = data.get("language_code", "en")
 
             if not contacts:
                 return JsonResponse({"error": "No contacts selected"}, status=400)
@@ -143,6 +143,7 @@ def send_whatsapp_message(request):
                         "language": {"code": language_code},
                     }
                 }
+                print(template_name)
 
                 try:
                     response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload, timeout=10)
@@ -152,8 +153,9 @@ def send_whatsapp_message(request):
                     results.append({
                         "phone_number": phone_number,
                         "status": "Sent" if response.status_code == 200 else "Failed",
-                        "error": response_data.get("error", {}).get("message", "Unknown error")
+                        "error": response_data  # Change this line to return full response
                     })
+
                     print(f"Message sent to {phone_number}: Status - {'Sent' if response.status_code == 200 else 'Failed'}")
                 except requests.exceptions.RequestException as req_err:
                     logger.error(f"Network error for {phone_number}: {req_err}")
@@ -170,3 +172,4 @@ def send_whatsapp_message(request):
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return JsonResponse({"error": str(e)}, status=500)
+
