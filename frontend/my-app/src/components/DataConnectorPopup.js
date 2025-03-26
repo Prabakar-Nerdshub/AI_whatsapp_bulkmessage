@@ -18,7 +18,7 @@ const DataConnectorPopup = ({ open, handleClose }) => {
     const [selectedFileGroup, setSelectedFileGroup] = useState("");
 
     useEffect(() => {
-        axios.get(`${CONFIG.API_BASE_URL}/file_groups/`)
+        axios.get(`${CONFIG.API_BASE_URL}/api/file_groups/`)
             .then((response) => setFileGroups(response.data))
             .catch((error) => console.error("Error fetching file groups:", error));
     }, []);
@@ -51,7 +51,7 @@ const DataConnectorPopup = ({ open, handleClose }) => {
 
         try {
             setUploadProgress(10);
-            const response = await axios.post(`${CONFIG.API_BASE_URL}/upload`, formData, {
+            const response = await axios.post(`${CONFIG.API_BASE_URL}/api/upload`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 onUploadProgress: (progressEvent) => {
                     const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CssBaseline, Box } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import axios from "axios";
-
+import CONFIG from "./config";
 import Sidebar from "./components/Sidebar";
 import Login from "./components/Login";
 import Chatbot from "./components/Chatbot";
@@ -28,7 +28,9 @@ const App = () => {
 
   const fetchFileGroups = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/file_groups/");
+      console.log('Inside API method');
+        const response = await axios.get(`${CONFIG.API_BASE_URL}/api/file_groups/`);
+        console.log('After Calling the API', response.data);
       setFileGroups(response.data.groups || []);
     } catch (error) {
       console.error("Error fetching file groups:", error);

@@ -9,8 +9,7 @@ load_dotenv(dotenv_path=BASE_DIR / ".env")
 # Security Settings
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-very-secure-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,10.20.152.18").split(",")
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '38.224.122.39']
 
 # Installed Apps
 INSTALLED_APPS = [
@@ -38,8 +37,14 @@ MIDDLEWARE = [
 ]
 
 # CORS Settings (Fix for localhost:3002)
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:3002").split(",")
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # If testing locally
+    "http://38.224.122.39:3000",   # Your public frontend IP/domain
+]
+
+#CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://38.224.122.39:3000,http://38.224.122.39:8000").split(",")
+#CORS_ALLOWED_ORIGINS = ["http://38.224.122.39:3000, http://38.224.122.39:8000"]
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"]
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies/auth headers
 CORS_ALLOW_HEADERS = [
@@ -50,7 +55,9 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
+
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+#CSRF_TRUSTED_ORIGINS = ["http://38.224.122.39"]
 
 # URL Configuration
 ROOT_URLCONF = 'AI_Chatbot.urls'
@@ -109,3 +116,4 @@ REST_FRAMEWORK = {
 
 # Auto Field for Django Models
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

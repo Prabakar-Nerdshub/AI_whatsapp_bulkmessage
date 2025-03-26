@@ -23,7 +23,7 @@ const ContactList = ({ setConfirmedContacts, fileGroups = [], selectedGroup, set
   const fetchContacts = async (group) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${CONFIG.API_BASE_URL}/get_contacts/${group}/`);
+      const response = await axios.get(`${CONFIG.API_BASE_URL}/api/get_contacts/${group}/`);
       setContacts(Array.isArray(response.data.contacts) ? response.data.contacts : []);
       setSelectedContacts([]); // Reset selection on new fetch
       setSelectAll(false);

@@ -24,7 +24,7 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${CONFIG.API_BASE_URL}/send_whatsapp_message`, {
+      const response = await axios.post(`${CONFIG.API_BASE_URL}/api/send_whatsapp_message`, {
         group_name: selectedGroup,
         contacts: confirmedContacts,
       });
