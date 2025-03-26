@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import CONFIG from "../config"; // Import CONFIG correctly
 import {
     Card, CardContent, Typography, Button, Input, Box, TextField,
     Snackbar, Alert, Dialog, LinearProgress, MenuItem, Select, FormControl, InputLabel
