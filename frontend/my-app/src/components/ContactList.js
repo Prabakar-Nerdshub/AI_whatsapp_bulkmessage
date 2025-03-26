@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import CONFIG from "../config";
 import {
   Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Checkbox, Button,
@@ -7,7 +8,7 @@ import {
   FormControl, Select, MenuItem, InputLabel
 } from "@mui/material";
 
-const ContactList = ({ setConfirmedContacts, fileGroups, selectedGroup, setSelectedGroup }) => {
+const ContactList = ({ setConfirmedContacts, fileGroups = [], selectedGroup, setSelectedGroup }) => {
   const [contacts, setContacts] = useState([]);
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,6 @@ const ContactList = ({ setConfirmedContacts, fileGroups, selectedGroup, setSelec
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
 
-  // Fetch contacts when a new group is selected
   useEffect(() => {
     if (selectedGroup) fetchContacts(selectedGroup);
   }, [selectedGroup]);
@@ -23,59 +23,49 @@ const ContactList = ({ setConfirmedContacts, fileGroups, selectedGroup, setSelec
   const fetchContacts = async (group) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/get_contacts/${group}/`);
-      setContacts(response.data.contacts || []);
+      const response = await axios.get(`${CONFIG.API_BASE_URL}/get_contacts/${group}/`);
+      setContacts(Array.isArray(response.data.contacts) ? response.data.contacts : []);
       setSelectedContacts([]); // Reset selection on new fetch
-      setSelectAll(false); // Reset "Select All" state
+      setSelectAll(false);
     } catch (error) {
+      console.error("Error fetching contacts:", error);
       setError("Failed to fetch contacts.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Toggle selection of individual contacts
   const handleContactSelect = (contact) => {
     setSelectedContacts((prev) =>
-      prev.includes(contact)
-        ? prev.filter((c) => c !== contact)
-        : [...prev, contact]
+      prev.includes(contact) ? prev.filter((c) => c !== contact) : [...prev, contact]
     );
   };
 
-  // Handle "Select All" checkbox
   const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedContacts([]);
-    } else {
-      setSelectedContacts(contacts);
-    }
+    setSelectedContacts(selectAll ? [] : [...contacts]);
     setSelectAll(!selectAll);
   };
 
   const handleConfirmSelection = () => {
-    setConfirmedContacts(selectedContacts);
+    setConfirmedContacts([...selectedContacts]);
     setOpenSnackbar(true);
   };
 
   return (
     <div>
-      {/* Dropdown to select contact group */}
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Select Contact Group</InputLabel>
-        <Select value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)}>
+        <Select value={selectedGroup || ""} onChange={(e) => setSelectedGroup(e.target.value)}>
           {fileGroups.map((group, index) => (
-            <MenuItem key={index} value={group.name}>{group.name}</MenuItem>
+            <MenuItem key={index} value={group.name}>{String(group.name)}</MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* Confirm Selection Button */}
       <Button variant="contained" color="primary" onClick={handleConfirmSelection} sx={{ mb: 2 }}>
         Confirm Selection
       </Button>
 
-      {/* Display contacts below the button */}
       {loading ? (
         <CircularProgress />
       ) : contacts.length > 0 ? (
@@ -104,25 +94,16 @@ const ContactList = ({ setConfirmedContacts, fileGroups, selectedGroup, setSelec
                       onChange={() => handleContactSelect(contact)}
                     />
                   </TableCell>
-                  <TableCell>{contact.name}</TableCell>
-                  <TableCell>{contact.phone_numbers}</TableCell>
+                  <TableCell>{String(contact.name)}</TableCell>
+                  <TableCell>{String(contact.phone_numbers)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       ) : (
-        <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
-          No contacts available.
-        </Typography>
+        <Typography>No contacts available.</Typography>
       )}
-
-      {/* Snackbar notification */}
-      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
-        <Alert onClose={() => setOpenSnackbar(false)} severity="success">
-          Contacts confirmed!
-        </Alert>
-      </Snackbar>
     </div>
   );
 };

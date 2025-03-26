@@ -130,3 +130,6 @@ dist
 .pnp.*
 
 backend/new_venv/
+venv/
+*.pyc
+__pycache__/

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
+import CONFIG from "../config";
 import {
   Card, CardContent, CardActions, Button,
   Typography, CircularProgress, Snackbar, Alert, Grid
 } from "@mui/material";
 
-const Chatbot = ({ confirmedContacts, selectedGroup }) => {
+const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -16,14 +17,14 @@ const Chatbot = ({ confirmedContacts, selectedGroup }) => {
       return;
     }
 
-    if (confirmedContacts.length === 0) {
+    if (!Array.isArray(confirmedContacts) || confirmedContacts.length === 0) {
       setError("No contacts selected.");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/send_whatsapp_message", {
+      const response = await axios.post(`${CONFIG.API_BASE_URL}/send_whatsapp_message`, {
         group_name: selectedGroup,
         contacts: confirmedContacts,
       });
@@ -46,24 +47,17 @@ const Chatbot = ({ confirmedContacts, selectedGroup }) => {
       <Grid container spacing={2} sx={{ width: "100%" }}>
         {/* Main Card */}
         <Grid item xs={6}>
-          <Card
-            className="shadow-lg rounded-lg"
-            sx={{
-              width: "45%",  // Adjusted width to fit grid layout
-              padding: "16px",
-              boxShadow: 3,
-            }}
-          >
+          <Card className="shadow-lg rounded-lg" sx={{ width: "100%", padding: "16px", boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Send WhatsApp Message
               </Typography>
 
               <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-                Selected Group: {selectedGroup || "None"}
+                Selected Group: {selectedGroup ? String(selectedGroup) : "None"}
               </Typography>
 
-              {confirmedContacts.length > 0 && (
+              {Array.isArray(confirmedContacts) && confirmedContacts.length > 0 && (
                 <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
                   Selected Contacts: {confirmedContacts.length}
                 </Typography>
@@ -85,17 +79,9 @@ const Chatbot = ({ confirmedContacts, selectedGroup }) => {
           </Card>
         </Grid>
 
-        {/* Empty Card for Future Use */}
+        {/* Placeholder Card */}
         <Grid item xs={6}>
-          <Card
-            className="shadow-lg rounded-lg"
-            sx={{
-              width: "60%",
-              height: "100%",
-              padding: "16px",
-              boxShadow: 3,
-            }}
-          >
+          <Card className="shadow-lg rounded-lg" sx={{ width: "100%", padding: "16px", boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h5" color="textSecondary">
                 Future Content Area
@@ -108,11 +94,13 @@ const Chatbot = ({ confirmedContacts, selectedGroup }) => {
         </Grid>
       </Grid>
 
-      <Snackbar
-        open={success}
-        autoHideDuration={3000}
-        onClose={() => setSuccess(false)}
-      >
+      <Snackbar open={!!error} autoHideDuration={3000} onClose={() => setError("")}>
+        <Alert onClose={() => setError("")} severity="error">
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar open={success} autoHideDuration={3000} onClose={() => setSuccess(false)}>
         <Alert onClose={() => setSuccess(false)} severity="success">
           Message sent successfully!
         </Alert>
