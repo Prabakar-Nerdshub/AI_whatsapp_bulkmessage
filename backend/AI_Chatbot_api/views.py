@@ -82,10 +82,13 @@ def file_groups(request):
 @csrf_exempt
 def get_contacts(request, file_id):
     try:
+        file_id = file_id.strip()  # Remove leading/trailing spaces
+        file_id = file_id.replace("%20", " ")  # Handle URL encoding of spaces
+
         # ✅ Fetch file by name
         grid_out = db.fs.files.find_one({"filename": file_id})
         if not grid_out:
-            return JsonResponse({"error": "File not found"}, status=404)
+            return JsonResponse({"error": f"File '{file_id}' not found"}, status=404)
 
         file_obj_id = grid_out["_id"]  # Extract file ID
         grid_out = fs.get(file_obj_id)  # Get the file from GridFS
@@ -97,12 +100,18 @@ def get_contacts(request, file_id):
         else:
             df = pd.read_excel(file_content, engine="openpyxl")
 
+        if df.empty:
+            return JsonResponse({"contacts": [], "message": "No contacts found in file."})
+
+        # Convert dataframe to list of dictionaries
         contacts = df.to_dict(orient="records")
 
         return JsonResponse({"contacts": contacts})
 
     except Exception as e:
+        logger.error(f"Error in get_contacts: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+
 
 
 # ✅ Send WhatsApp messages via API
@@ -112,8 +121,8 @@ def send_whatsapp_message(request):
         try:
             data = json.loads(request.body)
             contacts = data.get("contacts", [])
-            template_name = data.get("template_name", "sara2025message")
-            language_code = data.get("language_code", "en")
+            template_name = data.get("template_name", "sara2025")
+            language_code = data.get("language_code", "ms")
 
             if not contacts:
                 return JsonResponse({"error": "No contacts selected"}, status=400)
@@ -129,11 +138,11 @@ def send_whatsapp_message(request):
             results = []
             for contact in contacts:
                 phone_number = str(contact.get("phone_numbers"))
-                if not phone_number.isdigit() or len(phone_number) != 10:
+                if not phone_number.isdigit() :
                     results.append({"phone_number": phone_number, "status": "Invalid number"})
                     continue
 
-                phone_number = f"91{phone_number}"
+                phone_number = f"60{phone_number}"
                 payload = {
                     "messaging_product": "whatsapp",
                     "to": phone_number,

@@ -17,19 +17,18 @@ Including another URLconf
 # AI_Chatbot_api/urls.py
 
 from django.urls import path
-from .views import get_csrf_token, upload_file, get_phone_numbers,get_contacts, file_groups
+from .views import get_csrf_token, upload_file, get_phone_numbers, get_contacts, file_groups
 from .views import send_whatsapp_message
-from .callback import webhook_verification
-
+from .callback import webhook
 
 urlpatterns = [
     path("csrf/", get_csrf_token, name="csrf_token"),
-    path('upload', upload_file, name='upload_file'),
+    path("upload", upload_file, name="upload_file"),
     path("file_groups/", file_groups, name="file_groups"),
     path("get_contacts/<str:file_id>/", get_contacts, name="get_contacts"),
-    path("get_phone_numbers/<str:file_id>/", get_phone_numbers, name='get_phone_numbers'),
+    path("get_phone_numbers/<str:file_id>/", get_phone_numbers, name="get_phone_numbers"),
     path("send_whatsapp_message", send_whatsapp_message, name="send_whatsapp_message"),
-    path('webhook/', webhook_verification, name='webhook_verification'),
+    path("webhook/", webhook, name="webhook"),
 ]
 
 
