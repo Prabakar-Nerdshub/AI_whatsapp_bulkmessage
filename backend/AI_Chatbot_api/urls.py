@@ -19,7 +19,10 @@ Including another URLconf
 from django.urls import path
 from .views import get_csrf_token, upload_file, get_phone_numbers, get_contacts, file_groups
 from .views import send_whatsapp_message
-from .callback import webhook
+from .whatsapp_flow_handler import webhook
+from .message_response import message_response_webhook
+
+
 
 urlpatterns = [
     path("csrf/", get_csrf_token, name="csrf_token"),
@@ -29,6 +32,10 @@ urlpatterns = [
     path("get_phone_numbers/<str:file_id>/", get_phone_numbers, name="get_phone_numbers"),
     path("send_whatsapp_message", send_whatsapp_message, name="send_whatsapp_message"),
     path("webhook/", webhook, name="webhook"),
+    path('webhook/response/', message_response_webhook, name='message_response_webhook'),
+
+    
 ]
+
 
 

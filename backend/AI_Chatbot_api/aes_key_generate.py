@@ -14,3 +14,9 @@ def generate_aes_key(key_size=32):
 
 # Generate a 32-byte AES key (AES-256)
 generate_aes_key(32)
+
+
+import base64
+
+key = base64.b64decode("qDotF5fr8aQiVEMwSWySS9n0gqzDIblfDm3oy4qdyRk=")
+print(len(key))  # Should print 32

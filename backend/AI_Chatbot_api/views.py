@@ -121,7 +121,7 @@ def send_whatsapp_message(request):
         try:
             data = json.loads(request.body)
             contacts = data.get("contacts", [])
-            template_name = data.get("template_name", "sara2025")
+            template_name = data.get("template_name", "sara_flow_temp")
             language_code = data.get("language_code", "ms")
 
             if not contacts:
@@ -142,7 +142,7 @@ def send_whatsapp_message(request):
                     results.append({"phone_number": phone_number, "status": "Invalid number"})
                     continue
 
-                phone_number = f"60{phone_number}"
+                phone_number = f"91{phone_number}"
                 payload = {
                     "messaging_product": "whatsapp",
                     "to": phone_number,
@@ -150,13 +150,28 @@ def send_whatsapp_message(request):
                     "template": {
                         "name": template_name,
                         "language": {"code": language_code},
+                        "components": [
+                            {
+                                "type": "button",
+                                "sub_type": "flow",
+                                "index": "0",
+                                "parameters": [
+                                    {
+                                        "type": "payload",
+                                        "payload": "1189788102675427"  # Replace with your actual Flow ID
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 }
+                
                 print(template_name)
 
                 try:
                     response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload, timeout=10)
                     response_data = response.json()
+                    print(f"WhatsApp API Response for {phone_number}: {json.dumps(response_data, indent=2)}")
                     logger.info(f"Response for {phone_number}: {response_data}")
 
                     results.append({
@@ -168,6 +183,7 @@ def send_whatsapp_message(request):
                     print(f"Message sent to {phone_number}: Status - {'Sent' if response.status_code == 200 else 'Failed'}")
                 except requests.exceptions.RequestException as req_err:
                     logger.error(f"Network error for {phone_number}: {req_err}")
+                    logger.error(f"WhatsApp API Response: {json.dumps(response_data, indent=2)}")
                     results.append({
                         "phone_number": phone_number,
                         "status": "Failed",

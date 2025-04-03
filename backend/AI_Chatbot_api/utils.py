@@ -2,27 +2,48 @@ import os
 import json
 import base64
 from dotenv import load_dotenv
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 # Load environment variables
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path)
 
-# Retrieve AES key from environment variable
-AES_SECRET_KEY_B64 = os.getenv("AES_SECRET_KEY")
-if not AES_SECRET_KEY_B64:
-    raise ValueError("Missing AES_SECRET_KEY in environment variables.")
+# Load RSA Private Key for AES decryption
+RSA_PRIVATE_KEY_PATH = os.getenv("RSA_PRIVATE_KEY_PATH")
 
-try:
-    AES_SECRET_KEY = base64.b64decode(AES_SECRET_KEY_B64)
-    if len(AES_SECRET_KEY) not in [16, 24, 32]:
-        raise ValueError(f"Invalid AES Key: Must be 16, 24, or 32 bytes, got {len(AES_SECRET_KEY)} bytes.")
-except Exception as e:
-    raise ValueError(f"Invalid AES_SECRET_KEY format: {str(e)}")
+
+if not RSA_PRIVATE_KEY_PATH or not os.path.exists(RSA_PRIVATE_KEY_PATH):
+    raise ValueError(f"Missing or invalid RSA_PRIVATE_KEY_PATH: {RSA_PRIVATE_KEY_PATH}")
+
+with open(RSA_PRIVATE_KEY_PATH, "rb") as key_file:
+    PRIVATE_KEY = serialization.load_pem_private_key(
+        key_file.read(),
+        password=None  # Add password if needed
+    )
+
+   # encrypted_aes_key = "odhlUnRcn9ANMLTloIgxkzjefYmNr2pThF672hsEnfA4ye8xzgO0/h5WeXAH3DgGTJ8fgiJeSJvv3Kv/CBusf/N4qqJ+BdcngIENpeQrda9JHpVNlSyLYUhOYbsbV0mcbllM+YUlWeaH70Kj5UOwui3i/vDxYbGdhN7CO7V2vcy1xHAovUjFdhOrBAW9P5cAWOohq5FOWTD7s7MW1mlpA1YryA+qyr5PdjtHdOBu4aq7ICmiyF7l5HvPd6dVIi4vLT0NLB/7UOOa0hD2B7nE2Z595N/ki9Vx1LeGp7jC07EohchPqZ4i4hjSPFVFUBxHCvDAFEL3qQiNWzVEL4x7VQ=="
+
+def decrypt_aes_key(encrypted_aes_key):
+    """Decrypts AES key using RSA Private Key."""
+    print(f"Provate Kye path is: {RSA_PRIVATE_KEY_PATH}")
+    try:
+        decrypted_aes_key = PRIVATE_KEY.decrypt(
+            base64.b64decode(encrypted_aes_key),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return decrypted_aes_key
+    except Exception as e:
+        raise ValueError(f"RSA decryption failed: {str(e)}")
 
 def encrypt_data(data, key):
     """Encrypts data using AES-GCM."""
-    iv = os.urandom(12)  # Generate a 12-byte IV for AES-GCM
+    iv = os.urandom(12)  # Generate a 12-byte IV
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv))
     encryptor = cipher.encryptor()
 
@@ -43,13 +64,3 @@ def decrypt_data(encrypted_b64, key):
 
     except Exception as e:
         raise ValueError(f"Decryption failed: {str(e)}")
-
-# Example usage
-if __name__ == "__main__":
-    sample_data = {"message": "Hello, AES-GCM Encryption!"}
-
-    encrypted_text = encrypt_data(sample_data, AES_SECRET_KEY)
-    print("Encrypted:", encrypted_text)
-
-    decrypted_text = decrypt_data(encrypted_text, AES_SECRET_KEY)
-    print("Decrypted:", decrypted_text)
