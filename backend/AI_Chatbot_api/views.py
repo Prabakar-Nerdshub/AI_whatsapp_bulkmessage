@@ -121,7 +121,7 @@ def send_whatsapp_message(request):
         try:
             data = json.loads(request.body)
             contacts = data.get("contacts", [])
-            template_name = data.get("template_name", "sara_flow_temp")
+            template_name = data.get("template_name", "nerdshub_sara")
             language_code = data.get("language_code", "ms")
 
             if not contacts:

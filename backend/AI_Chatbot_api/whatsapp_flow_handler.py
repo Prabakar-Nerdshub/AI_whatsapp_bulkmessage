@@ -1,43 +1,152 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+import requests
 import os
 from base64 import b64decode, b64encode
 from cryptography.hazmat.primitives.asymmetric.padding import OAEP, MGF1, hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
-from .views import send_whatsapp_message
+from .utils import encrypt_flow_response
 
-# Load the RSA private key from a file
-PRIVATE_KEY_PATH = 'D:/meta_api_implement/backend/AI_Chatbot_api/pem_file/new_private.pem'
+PRIVATE_KEY_PATH = r'D:/meta_api_implement/backend/AI_Chatbot_api/pem_file/new_private.pem'
 
+# Response map for flow options
 responses = {
-    "0_Semak_Bantuan": "Anda telah memilih Semak Bantuan. Sila tunggu sebentar.",
-    "1_Senarai_Pasaraya": "Berikut adalah senarai pasaraya yang mengambil bahagian: [Link]",
-    "2_Program_SARA": "Maklumat mengenai Program SARA boleh didapati di sini: [Link]",
-    "3_Cara_Tebus_Bantuan": "Ikuti langkah ini untuk menebus bantuan: [Link]",
-    "4_Mewakilkan_Ahli_Keluarga": "Maklumat lanjut mengenai mewakilkan ahli keluarga: [Link]",
-    "5_Barang_Bantuan": "Barang bantuan yang tersedia: [List]",
-    "6_Jumlah_Bantuan": "Jumlah bantuan yang boleh anda terima adalah bergantung kepada kelayakan anda.",
-    "7_Waktu_Tebus_Bantuan": "Anda boleh menebus bantuan dalam waktu berikut: [Time]",
-    "8__Hubungi_Kami": "Sila hubungi kami di nombor berikut: +60123456789",
-    "9__IC_Hilang_/_Rosak": "Sekiranya IC anda hilang atau rosak, sila rujuk kepada Jabatan Pendaftaran Negara."
-}
+    "0_Semak_Bantuan": '''Sila layari pautan berikut untuk Semak Status Bantuan anda.
+Pautan: https://app.mykasih.net/sara2/checkstatus (TEKAN)
+Nota Penting: Anda TIDAK BOLEH memohon untuk Program SARA. Kelayakan
+SARA 2025 adalah secara automatik berdasarkan data Miskin
+Tegar dan Miskin eKasih sehingga 31 Oktober 2024. SARA 2025 turut diperluas
+kepada semua penerima STR 2025 kategori Isi Rumah dan Warga Emas Tiada
+Pasangan.
+Untuk sebarang pertanyaan sila hubungi talian MyKasih di +60377201800 (Isnin -
+Jumaat @ 9am - 5pm)''',
+
+    "1_Senarai_Pasaraya": '''Penerima yang layak akan diberi penerangan mengenai kedai runcit terdekat
+untuk membeli barangan keperluan asas. MyKasih mempunyai lebih daripada
+1,200 rakan niaga di seluruh negara termasuk Mydin, Giant, Econsave, The Store,
+Pacific, Milimewa, 99 Speedmart, Lotus Stores (Tesco), serta pasar raya dan
+pasar mini bebas. Sila layari pautan berikut untuk dapatkan senarai pasaraya
+terpilih MyKasih berdekatan anda.
+Senarai pasaraya: https://app.mykasih.net/sara2/merchant-list''',
+
+    "2_Program_SARA": '''Sumbangan Asas Rahmah (SARA) merupakan program bantuan bersasar
+kepada rakyat yang paling terkesan dengan gelumang kos sara hidup. Program
+sumbangan ini adalah untuk mengangkat taraf ekonomi golongan rentan dan
+menjunjung prinsip kesaksamaan yang menjadi teras kepada kerangka Ekonomi
+MADANI.
+Penerima STR 2025 yang telah disahkan daripada data Miskin Tegar dan Miskin
+eKasih layak SARA 2025 berjumlah RM100 / RM50 setiap bulan bagi tempoh 12
+bulan (Januari 2025 - Disember 2025).
+Manakala kadar tambahan kepada semua penerima STR 2025 kategori Isi
+Rumah dan Warga Emas Tiada Pasangan adalah RM100 / RM50 setiap bulan
+bagi tempoh 9 bulan (April 2025 - Disember 2025).''',
+
+    "3_Cara_Tebus_Bantuan": '''Sila layari pautan berikut untuk mengetahui cara menebus bantuan anda.
+CARA TEBUS BANTUAN (TONTON):
+https://www.youtube.com/watch?v=hxYmi0OZPEg/
+Untuk sebarang pertanyaan sila hubungi talian MyKasih di +60377201800 (Isnin -
+Jumaat @ 9am - 5pm)''',
+
+    "4_Mewakilkan_Ahli_Keluarga": '''Penerima boleh menghantar ahli keluarga sebagai wakil untuk buat pembelian
+namun, sebarang pembelian yang dibuat oleh individu selain penerima adalah di
+bawah tanggungjawab penerima itu sendiri. Sila bawa bersama IC asal penerima
+semasa / untuk tebus bantuan.''',
+
+    "5_Barang_Bantuan": '''Penerima boleh membeli barangan keperluan asas daripada 13 kategori
+produk yang diluluskan iaitu beras, roti, telur, minyak masak, tepung, biskut, mi
+segera, minuman, makanan dalam tin, bahan perasa, produk kebersihan,
+ubat-ubatan dan barangan persekolahan.''',
+
+    "6_Jumlah_Bantuan": '''Penerima akan menerima elaun bulanan melalui MyKad mereka untuk
+membeli barang keperluan asas terpilih.
+Pembayaran kepada penerima SARA 2025 adalah seperti jadual berikut:
+Penerima STR 2025 yang telah disahkan daripada data Miskin Tegar dan Miskin
+eKasih layak SARA 2025 berjumlah RM100 / RM50 setiap bulan bagi tempoh 12
+bulan (Januari 2025 - Disember 2025). Sila rujuk jadual diatas.''',
+
+    "7_Waktu_Tebus_Bantuan": '''Anda boleh menebus bantuan pada bila-bila masa di pasaraya terpilih
+MyKasih terdekatan anda.
+Sila pilih "Senarai Pasaraya" di Menu Utama untuk senarai pasaraya.''',
+
+    "8__Hubungi_Kami": '''Sila hubungi talian hotline MyKasih di +60377201800 (Isnin - Jumaat @ 9am - 5pm)''',
+    "9__IC_Hilang_/_Rosak": '''Sila hubungi Talian Bantuan MyKasih.
+Pengecualian pembelian secara manual akan diberikan hanya bagi satu transaksi
+pembelian. Pembelian seterusnya hanya boleh dibuat menggunakan MyKad
+baharu anda.
+Hubungi Talian Bantuan MyKasih: 03-7720 1800 (Isnin - Jumaat @ 9am - 5pm)'''
+    }
+
+WHATSAPP_API_URL = "https://graph.facebook.com/v22.0/627644197089809/messages"
+WHATSAPP_ACCESS_TOKEN = "EAAYgHPHSE6MBO4sSEZCcZASaZAYyVtMUj97AR36girXjcHq1Na7Y8aQ6etfaEKImTnrdwcPnx7zZBieBkXWBVISuzgQ9mUBtDGacCaUFbBz5ZAzOcRKZBfuphySmr0Wx3ABNVt23zggR1vhUa4VH0lr6bRihfr0cxdDDGHprL04h9cQLCQKi3RFwZB3SLhJ6DB3egZCHX7WQVam51xiU"
+
+def send_whatsapp_message(phone, message):
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone,
+        "type": "text",
+        "text": {"body": message}
+    }
+    print(f"📤 Sending message to {phone}: {message}")
+    response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload)
+    print(f"🔁 WhatsApp API Response: {response.status_code} - {response.text}")
+    return response
 
 @csrf_exempt
 def webhook(request):
     if request.method == "POST":
-        return handle_post_request(request)
-    elif request.method == "GET":
-        return JsonResponse({"status": "ok"}, status=200)
-    else:
-        return HttpResponse("Method Not Allowed", status=405)
+        try:
+            print(f"📌 Received request to {request.path}")
+            print(f"📄 Request body: {request.body}")
+            
+            body = json.loads(request.body)
+            print("📥 Webhook Body:", json.dumps(body, indent=2))
+
+            if body.get("action") == "data_exchange" and "encrypted_flow_data" not in body:
+                return handle_unencrypted_flow(body)
+
+            if "entry" in body:
+                return handle_interactive_message(body)
+
+            return handle_post_request(request)
+
+        except Exception as e:
+            print(f"❌ Webhook Error: {e}")
+            return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
+    
+    return JsonResponse({"status": "ok"})
+
+def handle_unencrypted_flow(body):
+    try:
+        phone = body.get("phone_number", "")
+        user_selection_value = None
+        for key in body:
+            if key.startswith("screen_0_"):
+                user_selection_value = body[key]
+                break
+
+        if not user_selection_value:
+            return JsonResponse({"error": "No button selected"}, status=400)
+
+        response_message = responses.get(user_selection_value, "Terima kasih atas pilihan anda.")
+        send_whatsapp_message(phone, response_message)
+
+        return JsonResponse({"status": "ok", "message": response_message})
+
+    except Exception as e:
+        print(f"❌ handle_unencrypted_flow Error: {e}")
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 def handle_post_request(request):
     try:
         body = json.loads(request.body)
-
-        # Extract encrypted fields from the request
+        print("🌊 Incoming webhook:", request.body)
+        
         encrypted_flow_data_b64 = body.get("encrypted_flow_data")
         encrypted_aes_key_b64 = body.get("encrypted_aes_key")
         iv_b64 = body.get("initial_vector")
@@ -45,99 +154,166 @@ def handle_post_request(request):
         if not all([encrypted_flow_data_b64, encrypted_aes_key_b64, iv_b64]):
             return JsonResponse({"error": "Missing encryption fields"}, status=400)
 
-        # Decrypt the request data
         decrypted_data, aes_key, iv = decrypt_request(encrypted_flow_data_b64, encrypted_aes_key_b64, iv_b64)
-        print("Decrypted Data:", json.dumps(decrypted_data, indent=2))
-        # Extract necessary fields
+        print("🔓 Decrypted Data:", json.dumps(decrypted_data, indent=2))
+
         action = decrypted_data.get("action")
-        flow_token = "flows-builder-7797319f"
-        print(action)
+        phone_number = decrypted_data.get("user", {}).get("wa_id", "")
+        response_payload = {}
+
+        # Look for selection in different possible paths
+        selected_value = None
+        data = decrypted_data.get("data", {})
+        
+        # Check for direct key in data
+        if "screen_0_Senaria_Pilihan_0" in data:
+            selected_value = data["screen_0_Senaria_Pilihan_0"]
+        elif "Senaria_Pilihan_3e04aa" in data:
+            selected_value = data["Senaria_Pilihan_3e04aa"]
+            
+        # Check in form data if available
+        form_data = data.get("form", {})
+        if not selected_value and "Senaria_Pilihan_3e04aa" in form_data:
+            selected_value = form_data["Senaria_Pilihan_3e04aa"]
+            
+        # Also check in payload
+        payload = decrypted_data.get("payload", {})
+        if not selected_value and "screen_0_Senaria_Pilihan_0" in payload:
+            selected_value = payload["screen_0_Senaria_Pilihan_0"]
+
+        print(f"🔍 Selected value: {selected_value}")
+
         if action == "INIT":
-            response_payload = {                
-                "screen": "DETAILS",
-                "data": {}
-            }
+            response_payload = {"screen": "DETAILS", "data": {}}
+            print("✅ Responding to INIT with DETAILS screen")
 
         elif action == "data_exchange":
-            screen_id = decrypted_data.get("screen")
-            user_selection = decrypted_data.get("data", {}).get("selected_option")  # Extract selected option
-            print(user_selection)
-            
-            # Get predefined response
-            response_message = responses.get(user_selection, "Pilihan tidak sah.")  # Default message if not found
-            print(response_message)
-
-            # ✅ Send WhatsApp message
-            send_whatsapp_message({"contacts": [{"phone_numbers": decrypted_data.get("user_phone")}], "template_name": response_message, "language_code": "ms"})
-            print(send_whatsapp_message)
+            if selected_value:
+                msg = responses.get(selected_value, f"📌 Anda telah memilih: {selected_value.replace('_', ' ')}")
+                
+                if phone_number:
+                    send_whatsapp_message(phone_number, msg)
+                else:
+                    print("⚠️ No phone number available for sending WhatsApp message")
 
             response_payload = {
-                "screen": "SUCCESS",
+                "screen": "CONFIRMATION",
                 "data": {
-                    "extension_message_response": {
-                        "params": {
-                            "flow_token": flow_token,
-                            "response_message": response_message  # Send predefined response
-                        }
-                    }
+                    "selected_option": selected_value or "unknown"
                 }
             }
+            print("✅ Responding to data_exchange with CONFIRMATION screen")
 
+        elif action == "complete":
+            print("✅ Flow completed by user")
+            
+            # Extract selection from multiple possible locations
+            selection = selected_value
+            
+            if not selection:
+                # Try to get from payload directly
+                selection = payload.get("screen_0_Senaria_Pilihan_0", "")
+            
+            if not selection:
+                # Try to extract from form data if available
+                form_data = decrypted_data.get("form", {})
+                selection = form_data.get("Senaria_Pilihan_3e04aa", "")
+            
+            print(f"🔍 Final selected option: {selection}")
+            
+            response_message = responses.get(selection, "Terima kasih atas pilihan anda.")
+            
+            if phone_number:
+                send_whatsapp_message(phone_number, response_message)
+            else:
+                print("⚠️ No phone number found in complete action. Trying to find it elsewhere...")
+                # Try to find phone number in other parts of the data
+                user_data = decrypted_data.get("user", {})
+                if "phone" in user_data:
+                    phone_number = user_data["phone"]
+                    send_whatsapp_message(phone_number, response_message)
+                else:
+                    print("❌ Cannot find phone number to send message")
+
+            response_payload = {
+                "screen": None,
+                "data": {
+                    "status": "completed"
+                }
+            }
+            print("✅ Responding to complete action with completed status")
 
         elif action == "BACK":
-            response_payload = {
-                "screen": "DETAILS",
-                "data": {}
-            }
+            response_payload = {"screen": "DETAILS", "data": {}}
+            print("✅ Responding to BACK with DETAILS screen")
 
         else:
             response_payload = {"data": {"status": "active"}}
+            print(f"✅ Responding to unknown action {action} with active status")
 
-        # Encrypt the response before sending it back
-        encrypted_response = encrypt_response(response_payload, aes_key, iv)
+        encrypted_response = encrypt_flow_response(response_payload, aes_key, iv)
         return HttpResponse(encrypted_response, content_type="text/plain", status=200)
 
     except Exception as e:
-        print(f"Error: {e}")
-        return JsonResponse({"error": "Internal Server Error"}, status=500)
- 
+        print(f"❌ handle_post_request Error: {e}")
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
+
+def handle_interactive_message(entry):
+    try:
+        changes = entry.get("entry", [])[0].get("changes", [])
+        for change in changes:
+            messages = change.get("value", {}).get("messages", [])
+            for message in messages:
+                if message.get("type") == "interactive":
+                    interactive = message.get("interactive", {})
+                    if interactive.get("type") == "nfm_reply":
+                        nfm_reply = interactive.get("nfm_reply", {})
+                        response_json = json.loads(nfm_reply.get("response_json", "{}"))
+                        flow_token = response_json.get("flow_token", "")
+                        
+                        # Extract phone number
+                        phone_number = message.get("from", "")
+                        
+                        # Extract selected option if available
+                        selected_option = response_json.get("screen_0_Senaria_Pilihan_0", "")
+                        
+                        if selected_option and phone_number:
+                            response_message = responses.get(selected_option, "Terima kasih atas pilihan anda.")
+                            send_whatsapp_message(phone_number, response_message)
+                        
+                        screen_response = {
+                            "screen": "SUCCESS",
+                            "data": {
+                                "extension_message_response": {
+                                    "params": {
+                                        "flow_token": flow_token
+                                    }
+                                }
+                            }
+                        }
+                        encrypted_response = encrypt_flow_response(screen_response)
+                        return JsonResponse(encrypted_response)
+    except Exception as e:
+        print(f"❌ handle_interactive_message Error: {e}")
+    return JsonResponse({"status": "no-action"})
 
 def decrypt_request(encrypted_flow_data_b64, encrypted_aes_key_b64, iv_b64):
-    """
-    Decrypts the request payload from Meta using RSA and AES-GCM.
-    """
     flow_data = b64decode(encrypted_flow_data_b64)
     iv = b64decode(iv_b64)
 
-    # Load RSA private key
     with open(PRIVATE_KEY_PATH, 'rb') as key_file:
         private_key = load_pem_private_key(key_file.read(), password=None)
-    
-    # Decrypt AES key using RSA private key
+
     encrypted_aes_key = b64decode(encrypted_aes_key_b64)
     aes_key = private_key.decrypt(
-        encrypted_aes_key, 
+        encrypted_aes_key,
         OAEP(mgf=MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
     )
 
-    # Decrypt flow data using AES-GCM
-    encrypted_flow_data_body = flow_data[:-16]
-    encrypted_flow_data_tag = flow_data[-16:]
-    decryptor = Cipher(algorithms.AES(aes_key), modes.GCM(iv, encrypted_flow_data_tag)).decryptor()
-    decrypted_data_bytes = decryptor.update(encrypted_flow_data_body) + decryptor.finalize()
-    decrypted_data = json.loads(decrypted_data_bytes.decode("utf-8"))
+    encrypted_body = flow_data[:-16]
+    tag = flow_data[-16:]
+    decryptor = Cipher(algorithms.AES(aes_key), modes.GCM(iv, tag)).decryptor()
+    decrypted_bytes = decryptor.update(encrypted_body) + decryptor.finalize()
+    decrypted_data = json.loads(decrypted_bytes.decode("utf-8"))
 
     return decrypted_data, aes_key, iv
-
-def encrypt_response(response, aes_key, iv):
-    """
-    Encrypts the response payload using AES-GCM.
-    """
-    # Flip IV for response encryption
-    flipped_iv = bytearray([byte ^ 0xFF for byte in iv])
-
-    # Encrypt response using AES-GCM
-    encryptor = Cipher(algorithms.AES(aes_key), modes.GCM(flipped_iv)).encryptor()
-    encrypted_bytes = encryptor.update(json.dumps(response).encode("utf-8")) + encryptor.finalize() + encryptor.tag
-
-    return b64encode(encrypted_bytes).decode("utf-8") 
