@@ -19,6 +19,7 @@ from django.urls import path
 from .views import get_csrf_token, upload_file, get_phone_numbers, get_contacts, file_groups
 from .views import send_whatsapp_message
 from .whatsapp_flow_handler import webhook
+from .coustom_flowTemp import webhook1
 
 urlpatterns = [
     path("csrf/", get_csrf_token, name="csrf_token"),
@@ -29,7 +30,6 @@ urlpatterns = [
     path("send_whatsapp_message", send_whatsapp_message, name="send_whatsapp_message"),
     path("webhook/", webhook, name="webhook"),
     path("webhook", webhook, name="webhook_no_slash"),  # Add this line for paths without trailing slash
+    path("webhook1/", webhook1, name="webhook1"),
+    path("webhook1", webhook1, name="webhook1_no_slash"),
 ]
-
-
-

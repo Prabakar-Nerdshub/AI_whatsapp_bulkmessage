@@ -33,7 +33,7 @@ def encrypt_response(response_data, aes_key, iv):
 
 # Handle POST requests to /webhook/
 @csrf_exempt
-def webhook(request):
+def webhook_(request):
     if request.method == "POST":
         return handle_message_response(request)
     return JsonResponse({"error": "Only POST requests allowed"}, status=405)

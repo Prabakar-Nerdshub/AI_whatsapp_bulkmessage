@@ -18,8 +18,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from AI_Chatbot_api.whatsapp_flow_handler import webhook  # Import webhook directly
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("AI_Chatbot_api.urls")),  # Ensure API routes are included
+    path("api/", include('AI_Chatbot_api.urls')),  # Ensure API routes are included
+    path("webhook", webhook, name="webhook_direct"),  # Add direct webhook path
+    path("webhook/", webhook, name="webhook_direct_slash"),  # Add with trailing slash too
 ]

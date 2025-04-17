@@ -98,7 +98,7 @@ def send_whatsapp_message(phone, message):
     return response
 
 @csrf_exempt
-def webhook(request):
+def webhook1(request):
     if request.method == "POST":
         try:
             print(f"📌 Received request to {request.path}")
