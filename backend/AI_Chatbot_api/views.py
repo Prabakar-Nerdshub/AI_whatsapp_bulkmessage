@@ -12,6 +12,7 @@ from bson import ObjectId
 import logging
 import requests
 
+
 # Setup Logging
 logger = logging.getLogger(__name__)
 
@@ -121,6 +122,7 @@ def send_whatsapp_message(request):
         try:
             data = json.loads(request.body)
             contacts = data.get("contacts", [])
+            
             template_name = data.get("template_name", "nerdshub_sara")
             language_code = data.get("language_code", "ms")
 
@@ -129,6 +131,8 @@ def send_whatsapp_message(request):
 
             ACCESS_TOKEN = "EAAYgHPHSE6MBO4sSEZCcZASaZAYyVtMUj97AR36girXjcHq1Na7Y8aQ6etfaEKImTnrdwcPnx7zZBieBkXWBVISuzgQ9mUBtDGacCaUFbBz5ZAzOcRKZBfuphySmr0Wx3ABNVt23zggR1vhUa4VH0lr6bRihfr0cxdDDGHprL04h9cQLCQKi3RFwZB3SLhJ6DB3egZCHX7WQVam51xiU"
             WHATSAPP_API_URL = "https://graph.facebook.com/v22.0/627644197089809/messages"
+            #Nerdshub : https://graph.facebook.com/v22.0/627644197089809/messages
+            #custom number : https://graph.facebook.com/v22.0/610411742154061/messages
 
             headers = {
                 "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -158,7 +162,8 @@ def send_whatsapp_message(request):
                                 "parameters": [
                                     {
                                         "type": "payload",
-                                        "payload": "1189788102675427"  # Replace with your actual Flow ID
+                                        "payload": "550407894833698"  # Replace with your actual Flow ID
+                                        
                                     }
                                 ]
                             }
@@ -198,3 +203,22 @@ def send_whatsapp_message(request):
             logger.error(f"Unexpected error: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
+
+
+@csrf_exempt
+def fetch_whatsapp_insights(request):
+    """
+    Fetch WhatsApp Message Insights
+    """
+    ACCESS_TOKEN = "EAAYgHPHSE6MBO4sSEZCcZASaZAYyVtMUj97AR36girXjcHq1Na7Y8aQ6etfaEKImTnrdwcPnx7zZBieBkXWBVISuzgQ9mUBtDGacCaUFbBz5ZAzOcRKZBfuphySmr0Wx3ABNVt23zggR1vhUa4VH0lr6bRihfr0cxdDDGHprL04h9cQLCQKi3RFwZB3SLhJ6DB3egZCHX7WQVam51xiU"
+    HEADERS = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    url = "https://graph.facebook.com/v22.0/627644197089809/message_insights"
+    params = {
+        "metric": "messages_sent,messages_delivered,messages_received",
+        "period": "day"
+    }
+    response = requests.get(url, headers=HEADERS, params=params)
+    return JsonResponse(response.json(), safe=False)

@@ -9,7 +9,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from .utils import encrypt_flow_response
 
-PRIVATE_KEY_PATH = r'D:/meta_api_implement/backend/AI_Chatbot_api/pem_file/new_private.pem'
+PRIVATE_KEY_PATH = r'D:\meta_api_implement\backend\AI_Chatbot_api\pem_file\private_custom.pem'
+
 
 # Response map for flow options
 responses = {
@@ -78,7 +79,7 @@ baharu anda.
 Hubungi Talian Bantuan MyKasih: 03-7720 1800 (Isnin - Jumaat @ 9am - 5pm)'''
     }
 
-WHATSAPP_API_URL = "https://graph.facebook.com/v22.0/627644197089809/messages"
+WHATSAPP_API_URL = "https://graph.facebook.com/v22.0/610411742154061/messages" #Custom Number 
 WHATSAPP_ACCESS_TOKEN = "EAAYgHPHSE6MBO4sSEZCcZASaZAYyVtMUj97AR36girXjcHq1Na7Y8aQ6etfaEKImTnrdwcPnx7zZBieBkXWBVISuzgQ9mUBtDGacCaUFbBz5ZAzOcRKZBfuphySmr0Wx3ABNVt23zggR1vhUa4VH0lr6bRihfr0cxdDDGHprL04h9cQLCQKi3RFwZB3SLhJ6DB3egZCHX7WQVam51xiU"
 
 def send_whatsapp_message(phone, message):
@@ -105,7 +106,7 @@ def webhook1(request):
             print(f"📄 Request body: {request.body}")
             
             body = json.loads(request.body)
-            print("📥 Webhook Body:", json.dumps(body, indent=2))
+            print("📥 Webhook1 Body:", json.dumps(body, indent=2))
 
             if body.get("action") == "data_exchange" and "encrypted_flow_data" not in body:
                 return handle_unencrypted_flow(body)
@@ -116,7 +117,7 @@ def webhook1(request):
             return handle_post_request(request)
 
         except Exception as e:
-            print(f"❌ Webhook Error: {e}")
+            print(f"❌ Webhook1 Error: {e}")
             return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
     
     return JsonResponse({"status": "ok"})
@@ -302,7 +303,7 @@ def decrypt_request(encrypted_flow_data_b64, encrypted_aes_key_b64, iv_b64):
     iv = b64decode(iv_b64)
 
     with open(PRIVATE_KEY_PATH, 'rb') as key_file:
-        private_key = load_pem_private_key(key_file.read(), password=None)
+        private_key = load_pem_private_key(key_file.read(), b'Nerdshub@123')
 
     encrypted_aes_key = b64decode(encrypted_aes_key_b64)
     aes_key = private_key.decrypt(

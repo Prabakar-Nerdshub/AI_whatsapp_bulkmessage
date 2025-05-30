@@ -4,4 +4,5 @@ const CONFIG = {
 
 export default CONFIG;
 
-
+//http://127.0.0.1:8000/api/atm_transactions/
+//https://0.0.0.0:8000/api/atm_transactions/

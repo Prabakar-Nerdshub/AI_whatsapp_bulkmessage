@@ -78,7 +78,7 @@ baharu anda.
 Hubungi Talian Bantuan MyKasih: 03-7720 1800 (Isnin - Jumaat @ 9am - 5pm)'''
     }
 
-WHATSAPP_API_URL = "https://graph.facebook.com/v22.0/627644197089809/messages"
+WHATSAPP_API_URL = "https://graph.facebook.com/v22.0/627644197089809/messages" #Nerdshub Number 
 WHATSAPP_ACCESS_TOKEN = "EAAYgHPHSE6MBO4sSEZCcZASaZAYyVtMUj97AR36girXjcHq1Na7Y8aQ6etfaEKImTnrdwcPnx7zZBieBkXWBVISuzgQ9mUBtDGacCaUFbBz5ZAzOcRKZBfuphySmr0Wx3ABNVt23zggR1vhUa4VH0lr6bRihfr0cxdDDGHprL04h9cQLCQKi3RFwZB3SLhJ6DB3egZCHX7WQVam51xiU"
 
 def send_whatsapp_message(phone, message):
