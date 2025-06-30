@@ -50,9 +50,10 @@ const App = () => {
             display: "flex",
             height: "100vh",
             backgroundImage: "url('/background2.png')",
-            backgroundSize: "100%",
+            backgroundSize: "cover", // or "100%" if you prefer
             backgroundPosition: "bottom",
             backgroundRepeat: "no-repeat",
+            backgroundAttachment: "fixed", // <-- this makes it static
           }}
         >
           {isAuthenticated && <Sidebar />}

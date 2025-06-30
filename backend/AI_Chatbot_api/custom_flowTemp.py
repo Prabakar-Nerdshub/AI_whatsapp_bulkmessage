@@ -102,7 +102,7 @@ def send_whatsapp_message(phone, message):
 def webhook1(request):
     if request.method == "POST":
         try:
-            print(f"📌 Received request to {request.path}")
+            print(f"📌🔗🔗 Received request to {request.path}")
             print(f"📄 Request body: {request.body}")
             
             body = json.loads(request.body)
@@ -191,58 +191,42 @@ def handle_post_request(request):
         elif action == "data_exchange":
             if selected_value:
                 msg = responses.get(selected_value, f"📌 Anda telah memilih: {selected_value.replace('_', ' ')}")
-                
                 if phone_number:
                     send_whatsapp_message(phone_number, msg)
                 else:
                     print("⚠️ No phone number available for sending WhatsApp message")
-
-            response_payload = {
-                "screen": "CONFIRMATION",
-                "data": {
-                    "selected_option": selected_value or "unknown"
-                }
-            }
-            print("✅ Responding to data_exchange with CONFIRMATION screen")
+            # Always return DETAILS to keep the menu active
+            response_payload = {"screen": "DETAILS", "data": {}}
+            print("🔁 Responding to data_exchange with DETAILS screen again (for reuse)")
 
         elif action == "complete":
             print("✅ Flow completed by user")
-            
-            # Extract selection from multiple possible locations
-            selection = selected_value
-            
-            if not selection:
-                # Try to get from payload directly
-                selection = payload.get("screen_0_Senaria_Pilihan_0", "")
-            
-            if not selection:
-                # Try to extract from form data if available
-                form_data = decrypted_data.get("form", {})
-                selection = form_data.get("Senaria_Pilihan_3e04aa", "")
+
+            selection = selected_value or payload.get("screen_0_Senaria_Pilihan_0", "") or \
+                        decrypted_data.get("form", {}).get("Senaria_Pilihan_3e04aa", "")
             
             print(f"🔍 Final selected option: {selection}")
-            
+
             response_message = responses.get(selection, "Terima kasih atas pilihan anda.")
             
             if phone_number:
                 send_whatsapp_message(phone_number, response_message)
             else:
-                print("⚠️ No phone number found in complete action. Trying to find it elsewhere...")
-                # Try to find phone number in other parts of the data
-                user_data = decrypted_data.get("user", {})
-                if "phone" in user_data:
-                    phone_number = user_data["phone"]
-                    send_whatsapp_message(phone_number, response_message)
-                else:
-                    print("❌ Cannot find phone number to send message")
+                print("⚠️ No phone number found to send message")
 
+            # ✅ Loop back to DETAILS screen and keep active
             response_payload = {
-                "screen": None,
-                "data": {
-                    "status": "completed"
+                "screen": None,  # Stay on the same screen
+                "data": {},
+                "extension_message_response": {
+                    "params": {
+                        "keep_active": True,
+                        "allow_reentry": True
+                    }
                 }
             }
-            print("✅ Responding to complete action with completed status")
+
+            print("🔁 Responding to complete action by keeping flow active")
 
         elif action == "BACK":
             response_payload = {"screen": "DETAILS", "data": {}}
@@ -250,14 +234,14 @@ def handle_post_request(request):
 
         else:
             response_payload = {"data": {"status": "active"}}
-            print(f"✅ Responding to unknown action {action} with active status")
+            print(f"✅ Responding to meta whatsapp health check action {action} with active status")
 
         encrypted_response = encrypt_flow_response(response_payload, aes_key, iv)
         return HttpResponse(encrypted_response, content_type="text/plain", status=200)
 
     except Exception as e:
         print(f"❌ handle_post_request Error: {e}")
-        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500) 
 
 def handle_interactive_message(entry):
     try:

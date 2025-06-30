@@ -14,8 +14,9 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Select
+  Select,
 } from "@mui/material";
+import nerdsLogo from "../assets/nerdslogo.png"; // ✅ Replace with your actual path
 
 const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,6 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [insights, setInsights] = useState(null);
 
-  // Static template list (can be fetched dynamically)
   const templates = [
     {
       name: "nerdshub_sara",
@@ -32,7 +32,30 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
       status: "Active – Quality",
       messagePreview: "Hi Saya sebuah ChatBot Automasi ..."
     },
-    // Add more templates here if needed
+    {
+      name: "sara_list_message",
+      language: "Malay",
+      status: "Active – Quality",
+      messagePreview: "Hi Saya sebuah ChatBot Automasi ..."
+    },
+    {
+      name: "sara_interactive_custom",
+      language: "English",
+      status: "Active – Quality",
+      messagePreview: "Hi Saya sebuah ChatBot Automasi ..."
+    },
+    {
+      name: "custom_temp1",
+      language: "English",
+      status: "Active – Quality",
+      messagePreview: "Hi Saya sebuah ChatBot Automasi ..."
+    },
+    {
+      name: "blackfriday",
+      language: "English",
+      status: "Active – Quality",
+      messagePreview: "Black Friday is around the corner and as promised we are given you early access to our deals. Select the best deal for the product you are intrested in!"
+    }
   ];
 
   const handleSendMessage = async () => {
@@ -61,7 +84,7 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
 
       if (response.status === 200) {
         setSuccess(true);
-        fetchInsights(); // refresh insights after sending
+        fetchInsights();
       } else {
         setError("Failed to send messages.");
       }
@@ -87,18 +110,18 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <Grid container spacing={2} sx={{ width: "100%" }}>
-        {/* Left Card - Message Send Info */}
-        <Grid item xs={6}>
-          <Card className="shadow-lg rounded-lg" sx={{ width: "100%", padding: "16px", boxShadow: 3 }}>
+    <div className="flex justify-center items-center bg-gray-100 p-4">
+      <Grid container spacing={2}>
+        {/* Left side */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ padding: 2, boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Send WhatsApp Message
               </Typography>
 
-              <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-                Selected Group: {selectedGroup ? String(selectedGroup) : "None"}
+              <Typography variant="body1" color="textSecondary">
+                Selected Customer: {selectedGroup || "None"}
               </Typography>
 
               {Array.isArray(confirmedContacts) && confirmedContacts.length > 0 && (
@@ -106,15 +129,6 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
                   Selected Contacts: {confirmedContacts.length}
                 </Typography>
               )}
-
-             {/* {insights && (
-                <div style={{ marginTop: "20px" }}>
-                  <Typography variant="subtitle1" gutterBottom>WhatsApp Insights</Typography>
-                  <Typography variant="body2">Messages Sent: {insights.messages_sent}</Typography>
-                  <Typography variant="body2">Messages Delivered: {insights.messages_delivered}</Typography>
-                  <Typography variant="body2">Messages Read: {insights.messages_read}</Typography>
-                </div>
-              )}*/}
             </CardContent>
 
             <CardActions>
@@ -130,11 +144,134 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
               </Button>
             </CardActions>
           </Card>
+
+          {/* Chat Preview */}
+          <Card
+            sx={{
+              width: "80%",
+              mt: 2,
+              padding: 2,
+              backgroundColor: "#e5ddd5",
+              borderRadius: "12px",
+              boxShadow: 3,
+              maxHeight: 500,
+              overflowY: "auto",
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+              <img
+                src="/nerdslogo.png"
+                alt="nerdshub logo"
+                style={{ width: 40, height: 40, borderRadius: "50%", marginRight: 12 }}
+              />
+              <div>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  Nerdshub
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  Business Account
+                </Typography>
+              </div>
+            </div>
+
+            {/* Message bubbles */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {/* Bot Message 1 */}
+              <div
+                style={{
+                  alignSelf: "flex-start",
+                  background: "#fff",
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  fontSize: "13px",
+                  lineHeight: "1.5",
+                  maxWidth: "100%",
+                }}
+              >
+                <strong>Salam MyKasih!</strong><br />
+                Hi<br />
+                Saya sebuah ChatBot Automasi (bukan manusia). I am an <br />
+                Automated ChatBot (non-human) Bagaimana boleh saya bantu anda?<br />
+                    
+                How can I help you?
+                Sila pilih
+                
+                <div
+                style={{
+                  alignSelf: "flex-end",
+                  background: "#dcf8c6",
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  maxWidth: "41%",
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: "#25D366",
+                    color: "white",
+                    borderRadius: "6px",
+                    padding: "6px 10px",
+                    display: "inline-block",
+                    fontWeight: "bold",
+                    fontSize: "13px",
+                  }}
+                >
+                  📄 Senarai Pilihan
+                </div>
+              </div>
+              <Typography variant="caption" color="textSecondary" sx={{ float: "right", fontSize: "10px", mt: 1 }}>
+                  5:08 pm
+                </Typography>
+              </div>
+
+              {/* User Response Bubble */}
+              <div
+                style={{
+                  alignSelf: "flex-end",
+                  background: "#dcf8c6",
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  maxWidth: "60%",
+                }}
+                >
+                <div>
+                  <Typography variant="body2">Selected Option : Program SARA 2025</Typography>
+                </div>
+                <Typography variant="caption" color="textSecondary" sx={{ float: "right", fontSize: "10px", mt: 1 }}>
+                  5:08 pm
+                </Typography>
+              </div>
+
+              {/* Bot Message 2 */}
+              <div
+                style={{
+                  alignSelf: "flex-start",
+                  background: "#fff",
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  fontSize: "13px",
+                  lineHeight: "1.5",
+                  maxWidth: "80%",
+                }}
+              >
+                <Typography variant="body2">
+                  Sumbangan Asas Rahmah (SARA) merupakan program bantuan bersasar kepada rakyat yang paling terkesan dengan gelumang kos sara hidup. <br /><br />
+                  Program ini untuk mengangkat taraf ekonomi golongan rentan dan menjunjung prinsip kesaksamaan yang menjadi teras kepada kerangka Ekonomi MADANI. <br /><br />
+                  Penerima STR 2025 yang telah disahkan daripada data Miskin Tegar dan Miskin eKasih layak SARA 2025 berjumlah RM100 / RM50 setiap bulan bagi tempoh 12 bulan (Januari 2025 - Disember 2025). <br /><br />
+                  Manakala kadar tambahan kepada semua penerima STR 2025 kategori Isi Rumah dan Warga Emas Tiada Pasangan adalah RM100 / RM50 setiap bulan bagi tempoh 9 bulan (April 2025 - Disember 2025).
+                </Typography>
+                <Typography variant="caption" color="textSecondary" sx={{ float: "right", fontSize: "10px", mt: 1 }}>
+                  5:08 pm
+                </Typography>
+              </div>
+            </div>
+          </Card>
         </Grid>
 
-        {/* Right Card - Template Selector */}
-        <Grid item xs={6}>
-          <Card className="shadow-lg rounded-lg" sx={{ width: "100%", padding: "16px", boxShadow: 3 }}>
+        {/* Right side */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ padding: 2, boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Select Template
@@ -171,14 +308,12 @@ const Chatbot = ({ confirmedContacts = [], selectedGroup }) => {
         </Grid>
       </Grid>
 
-      {/* Error Snackbar */}
+      {/* Snackbar */}
       <Snackbar open={!!error} autoHideDuration={3000} onClose={() => setError("")}>
         <Alert onClose={() => setError("")} severity="error">
           {error}
         </Alert>
       </Snackbar>
-
-      {/* Success Snackbar */}
       <Snackbar open={success} autoHideDuration={3000} onClose={() => setSuccess(false)}>
         <Alert onClose={() => setSuccess(false)} severity="success">
           Message sent successfully!

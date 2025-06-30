@@ -2,7 +2,7 @@ import requests
 import json
 
 # Webhook API URL (adjust if running on a different host)
-webhook_url = "https://nerdshub.ai/api/webhook/"
+webhook_url = "https://message-broadcast.nerdshub.ai/api/webhook/"
 
 # Load the saved encrypted payload
 def load_encrypted_payload(filename="encrypted_payload.json"):

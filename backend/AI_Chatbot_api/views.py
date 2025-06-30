@@ -123,8 +123,9 @@ def send_whatsapp_message(request):
             data = json.loads(request.body)
             contacts = data.get("contacts", [])
             
-            template_name = data.get("template_name", "nerdshub_sara")
-            language_code = data.get("language_code", "ms")
+            template_name = data.get("template_name", "sara_list_message") #nerdshub_sara , sara_list_message
+            language_code = data.get("language_code", "ms")  # Default to English if not provided
+            print("Received template_name:", data.get("template_name"))
 
             if not contacts:
                 return JsonResponse({"error": "No contacts selected"}, status=400)
@@ -162,7 +163,7 @@ def send_whatsapp_message(request):
                                 "parameters": [
                                     {
                                         "type": "payload",
-                                        "payload": "550407894833698"  # Replace with your actual Flow ID
+                                        "payload": "1403483110693196"  # Replace with your actual Flow ID 550407894833698,1403483110693196
                                         
                                     }
                                 ]

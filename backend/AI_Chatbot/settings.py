@@ -9,7 +9,7 @@ load_dotenv(dotenv_path=BASE_DIR / ".env")
 # Security Settings
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-very-secure-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '38.224.122.39','nerdshub.ai','www.nerdshub.ai']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '38.224.122.39','nerdshub.ai','www.nerdshub.ai','message-broadcast.nerdshub.ai']
 
 # Installed Apps
 INSTALLED_APPS = [
